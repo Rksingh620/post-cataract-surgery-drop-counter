@@ -98,9 +98,9 @@ function handleButtonClick(e) {
       ...md.medicine,
       [selectedDate]: md.medicine[selectedDate].map((m) => {
         if (m.name === medicineName) {
-          if (action === "add") {
+          if (action === "add" && m.count < m.maxCount) {
             m.count++;
-          } else if (action === "sub") {
+          } else if (action === "sub" && m.count > 0) {
             m.count--;
           }
         }
