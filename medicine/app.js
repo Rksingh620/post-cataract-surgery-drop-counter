@@ -1,98 +1,114 @@
-let medicineData = JSON.parse(localStorage.getItem("medicineData"));
+let allData = JSON.parse(localStorage.getItem("data"));
 let selectedDate = null;
-const container = document.getElementById("container");
+const containerBox = document.getElementById("containerBox");
+const selectedDateDropdown = document.getElementById("selectedDate");
 (function () {
-  setPatientName();
-  selectedDate = new Date().toDateString();
-  container.appendChild(generateMedicineTable());
-  addButtonListeners();
-  const selectedDateDropdown = document.getElementById("selectedDate");
-  setDateOptions(selectedDateDropdown);
-  selectedDateDropdown.addEventListener("change", function (e) {
-    selectedDate = new Date(e.target.value).toDateString();
-    container.replaceChildren(generateMedicineTable());
-    addButtonListeners();
+  const allDatesOfSurgeries = allData.map((d) => d.dateOfSurgery);
+  let idx = 0;
+  allDatesOfSurgeries.forEach((date, index) => {
+    if (new Date(date) > new Date(allDatesOfSurgeries[idx])) idx = index;
   });
+  setDateOptions(Object.keys(allData[idx].medicine));
+  selectedDate = new Date().toDateString();
+  render();
+  selectedDateDropdown.addEventListener("change", handleSelectedDateChange);
 })();
+function render() {
+  console.log(allData);
+  containerBox.innerHTML = "";
+  allData.forEach((data, index) => {
+    const containerContent = renderList(data, index);
+    containerBox.innerHTML += renderName(data.name);
+    containerBox.innerHTML += containerContent;
+  });
+  addButtonListeners();
+}
 function addButtonListeners() {
   const buttons = document.getElementsByTagName("button");
   for (let i = 0; i < buttons.length; i++) {
-    buttons[i].addEventListener("click", function (e) {
-      const [medicineName, action] = e.target.value.split("_");
-      //   update the count of the medicine in the medicineData for the selected date
-      const medicineIndex = medicineData.findIndex(
-        (med) => med.name === medicineName
-      );
-      const dateIndex = medicineData[medicineIndex].dates.findIndex(
-        (date) => date.date === selectedDate
-      );
-      let idx = medicineData[medicineIndex].dates[dateIndex];
-      if (action === "add" && idx.count < idx.maxCount) {
-        medicineData[medicineIndex].dates[dateIndex].count++;
-      } else if (action === "sub" && idx.count > 0) {
-        medicineData[medicineIndex].dates[dateIndex].count--;
-      }
-      localStorage.setItem("medicineData", JSON.stringify(medicineData));
-      container.replaceChildren(generateMedicineTable());
-      addButtonListeners();
-    });
+    buttons[i].addEventListener("click", handleButtonClick);
   }
 }
-function setPatientName() {
-  const patientName = document.getElementById("patientName");
-  const name = localStorage.getItem("name");
-  if (!name) {
-    window.location.href = "index.html";
-  }
-  patientName.textContent = name;
-}
-function setDateOptions(selectedDateDropdown) {
-  let createOptions = medicineData[4].dates.map((date) => {
-    return `<option value="${date.date}">${new Date(
-      date.date
-    ).toDateString()}</option>`;
+function setDateOptions(dates) {
+  let createOptions = dates.map((date) => {
+    return `<option value="${date}">${new Date(date).toDateString()}</option>`;
   });
   selectedDateDropdown.innerHTML = createOptions;
   selectedDateDropdown.value = new Date().toDateString();
 }
-function renderList(medicineData) {
-  return medicineData
-    .filter(
-      (med) => med.dates.findIndex((date) => date.date === selectedDate) !== -1
-    )
-    .map((medicine, index) => {
-      let date = medicine.dates.find((date) => date.date === selectedDate);
-      return `
-    <div class="flex justify-between bg-gray-50 py-2 my-1 rounded">
-        <div class='flex-1 text-center'>${medicine.name}</div>
-        <div class='flex-1 text-center'>${date.count}</div>
-        <div class='flex-1 text-center'>${date.maxCount}</div>
-        <div class='flex-1 text-center'>
-            <button type="button" value='${medicine.name}_sub' class="bg-gray-500 hover:bg-gray-700 text-sm text-white font-bold py-0.5 px-2 rounded">
-                -
-            </button>
-            <button type="button" value='${medicine.name}_add' class="bg-blue-500 hover:bg-blue-700 text-sm text-white font-bold py-0.5 px-2 rounded">
-                +
-            </button>
-        </div>
+function renderList(medicineData, index) {
+  const medicines = medicineData.medicine[selectedDate];
+  return `<div class="grid grid-cols-1 sm:grid-cols-2 mx-4 mb-10">
+    ${medicines
+      .map((medicine) => {
+        return renderOneMedicine(
+          medicine.name,
+          medicine.count,
+          medicine.maxCount,
+          index
+        );
+      })
+      .join(``)}
     </div>
     `;
-    })
-    .join(``);
 }
 
-function generateMedicineTable() {
-  const div = document.createElement("div");
-  div.setAttribute("id", "medicineTable");
-  div.setAttribute("class", "p-4 bg-white shadow-md rounded-md");
-  div.innerHTML = `
-<div class="flex justify-between mb-4">
-    <div class="font-bold flex-1 text-center">Medicine Name</div>
-    <div class="font-bold flex-1 text-center">Count</div>
-    <div class="font-bold flex-1 text-center">Max Count</div>
-    <div class="font-bold flex-1 text-center">Action</div>
-</div>
-${renderList(medicineData)}
-`;
-  return div;
+function renderOneMedicine(name, count, maxCount, index) {
+  return `<div class="bg-red-3 shadow m-3 border rounded p-2 px-6">
+  <p class="text-xs text-gray-300">Medicine Name</p>
+  <p class="text-sm">${name}</p>
+  <div class="flex justify-between py-2">
+  <div>
+  <p class="text-xs text-gray-300">Count</p>
+  <p class="text-sm">${count}</p></div>
+  <div>
+  <p class="text-xs text-gray-300">Max Count</p>
+  <p class="text-sm">${maxCount}</p></div>
+  </div>
+  <div class="flex gap-2">
+    <button type="button" value='${name}_${index}_sub'
+      class="flex-1 bg-gray-500 hover:bg-gray-700 text-sm text-white font-bold rounded">
+      -
+    </button>
+    <button type="button" value='${name}_${index}_add'
+      class="flex-1 bg-blue-500 hover:bg-blue-700 py-2 sm:py-4  text-sm text-white font-bold rounded">
+      +
+    </button>
+  </div>
+</div>`;
+}
+function renderName(name) {
+  return `<div class="flex flex-col">
+            <span class="text-sm text-gray-500">For</span>
+            <h1 class="text-2xl font-bold">${name}</h1>
+         </div>`;
+}
+function handleSelectedDateChange(e) {
+  selectedDate = new Date(e.target.value).toDateString();
+  render();
+}
+function handleButtonClick(e) {
+  const [medicineName, index, action] = e.target.value.split("_");
+  //   update the count of the medicine in the medicineData for the selected date
+  let md = allData[index];
+  console.log("🚀 ~ file: app.js:107 ~ handleButtonClick ~ medicine:", md);
+  md = {
+    ...md,
+    medicine: {
+      ...md.medicine,
+      [selectedDate]: md.medicine[selectedDate].map((m) => {
+        if (m.name === medicineName) {
+          if (action === "add") {
+            m.count++;
+          } else if (action === "sub") {
+            m.count--;
+          }
+        }
+        return m;
+      }),
+    },
+  };
+  allData[index] = md;
+  localStorage.setItem("data", JSON.stringify(allData));
+  render();
 }
