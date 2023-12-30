@@ -9,20 +9,41 @@ const generateInitialMedicineList = (dos) => {
   dateList.forEach((date, index) => {
     let dateWiseMedicine = [];
     if (index < 7) {
-      dateWiseMedicine.push({ name: "Mofo-Rx", count: 0, maxCount: 4 });
+      dateWiseMedicine.push({
+        name: "Mofo-Rx",
+        color: "#a68729",
+        count: 0,
+        maxCount: 4,
+      });
     }
     if (index < 21) {
-      dateWiseMedicine.push({ name: "CME-Rx", count: 0, maxCount: 3 });
+      dateWiseMedicine.push({
+        name: "CME-Rx",
+        color: "#390961",
+        count: 0,
+        maxCount: 3,
+      });
     }
     if (index < 5) {
-      dateWiseMedicine.push({ name: "Dorzo-Rx", count: 0, maxCount: 2 });
+      dateWiseMedicine.push({
+        name: "Dorzo-Rx",
+        color: "#38d662",
+        count: 0,
+        maxCount: 2,
+      });
     }
     if (index < 60) {
-      dateWiseMedicine.push({ name: "Sofi-Rx", count: 0, maxCount: 4 });
+      dateWiseMedicine.push({
+        name: "Sofi-Rx",
+        color: "#08378c",
+        count: 0,
+        maxCount: 4,
+      });
     }
     if (index < 42) {
       dateWiseMedicine.push({
         name: "Predo-Rx",
+        color: "#660e0e",
         count: 0,
         maxCount:
           index < 2
@@ -40,76 +61,16 @@ const generateInitialMedicineList = (dos) => {
     }
     res[date] = dateWiseMedicine;
   });
-  // let mofoRX = {
-  //   name: "Mofo-Rx",
-  //   dates: Array(7)
-  //     .fill("")
-  //     .map((_, index) => ({
-  //       date: getDateString(new Date(dos), index),
-  //       count: 0,
-  //       maxCount: 4,
-  //     })),
-  // };
-  // let CMERx = {
-  //   name: "CME-Rx",
-  //   dates: Array(21)
-  //     .fill("")
-  //     .map((_, index) => ({
-  //       date: getDateString(new Date(dos), index),
-  //       count: 0,
-  //       maxCount: 3,
-  //     })),
-  // };
-  // let DorzoRx = {
-  //   name: "Dorzo-Rx",
-  //   dates: Array(5)
-  //     .fill("")
-  //     .map((_, index) => ({
-  //       date: getDateString(new Date(dos), index),
-  //       count: 0,
-  //       maxCount: 2,
-  //     })),
-  // };
-  // let SofiRx = {
-  //   name: "Sofi-Rx",
-  //   dates: Array(60)
-  //     .fill("")
-  //     .map((_, index) => ({
-  //       date: getDateString(new Date(dos), index),
-  //       count: 0,
-  //       maxCount: 4,
-  //     })),
-  // };
-  // let PredoRx = {
-  //   name: "Predo-Rx",
-  //   dates: Array(42)
-  //     .fill("")
-  //     .map((_, index) => ({
-  //       date: getDateString(new Date(dos), index),
-  //       count: 0,
-  //       maxCount:
-  //         index < 2
-  //           ? 8
-  //           : index < 4
-  //           ? 6
-  //           : index < 21
-  //           ? 4
-  //           : index < 28
-  //           ? 3
-  //           : index < 35
-  //           ? 2
-  //           : 1,
-  //     })),
-  // };
   return res;
 };
 
 let allData = JSON.parse(localStorage.getItem("data") ?? "[]");
+const btnToMedicinePage = document.getElementById("linkToMedicinePage");
 function renderLists() {
   // create a div element and list out all the patients with their name and date of surgery and append it to the body
   const containerBox = document.getElementById("listOfPatients");
   if (allData.length === 0) {
-    document.getElementById("linkToMedicinePage").style.display = "none";
+    btnToMedicinePage.style.display = "none";
     containerBox.innerHTML = `<div class="flex justify-between bg-gray-50 py-2 my-1 rounded">
     <div class='flex-1 text-center'>No patients found</div>
     </div>`;
@@ -142,6 +103,7 @@ document
     };
     allData = [...allData, data];
     localStorage.setItem("data", JSON.stringify(allData));
+    btnToMedicinePage.style.display = "block";
     renderLists();
   });
 

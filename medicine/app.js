@@ -18,7 +18,7 @@ function render() {
   containerBox.innerHTML = "";
   allData.forEach((data, index) => {
     const containerContent = renderList(data, index);
-    containerBox.innerHTML += renderName(data.name);
+    containerBox.innerHTML += renderName(data.name, data.dateOfSurgery);
     containerBox.innerHTML += containerContent;
   });
   addButtonListeners();
@@ -38,13 +38,14 @@ function setDateOptions(dates) {
 }
 function renderList(medicineData, index) {
   const medicines = medicineData.medicine[selectedDate];
-  return `<div class="grid grid-cols-1 sm:grid-cols-2 mx-4 mb-10">
+  return `<div class="grid grid-cols-1 sm:grid-cols-2 sm:mx-4 mb-10">
     ${medicines
       .map((medicine) => {
         return renderOneMedicine(
           medicine.name,
           medicine.count,
           medicine.maxCount,
+          medicine.color,
           index
         );
       })
@@ -53,35 +54,58 @@ function renderList(medicineData, index) {
     `;
 }
 
-function renderOneMedicine(name, count, maxCount, index) {
-  return `<div class="bg-red-3 shadow m-3 border rounded p-2 px-6">
-  <p class="text-xs text-gray-300">Medicine Name</p>
-  <p class="text-sm">${name}</p>
+function renderOneMedicine(name, count, maxCount, color, index) {
+  return `<div class="bg-red-3 shadow-inset m-3 border rounded p-2 px-6 border-4 border-b-[${color}]">
   <div class="flex justify-between py-2">
-  <div>
-  <p class="text-xs text-gray-300">Count</p>
-  <p class="text-sm">${count}</p></div>
-  <div>
-  <p class="text-xs text-gray-300">Max Count</p>
-  <p class="text-sm">${maxCount}</p></div>
+    <div>
+      <p class="text-xs text-gray-300">Medicine Name</p>
+      <p class="text-sm text-[${color}]">${name}</p>
+      </div>
+      <div class='mr-2'>
+      <p class="text-xs text-gray-300 mb-1">Box Color</p>
+    <div class='bg-[${color}] h-10 w-12 rounded'>
+    </div>
+    </div>
+  </div>
+  <div class="flex justify-between py-2">
+    <div>
+      <p class="text-xs text-gray-300">Count</p>
+      <p class="text-sm">${count}</p>
+    </div>
+    <div>
+      <p class="text-xs text-gray-300">Max Count</p>
+      <p class="text-sm">${maxCount}</p>
+    </div>
   </div>
   <div class="flex gap-2">
     <button type="button" value='${name}_${index}_sub'
-      class="flex-1 bg-gray-500 hover:bg-gray-700 text-sm text-white font-bold rounded">
+      class="flex-1 bg-gray-500 hover:bg-gray-700 text-sm text-white font-bold rounded ${
+        count === 0 ? "opacity-10 pointer-events-none" : ""
+      }">
       -
     </button>
     <button type="button" value='${name}_${index}_add'
-      class="flex-1 bg-blue-500 hover:bg-blue-700 py-2 sm:py-4  text-sm text-white font-bold rounded">
+      class="flex-1 bg-blue-500 hover:bg-blue-700 py-2 sm:py-4  text-sm text-white font-bold rounded ${
+        count === maxCount ? "opacity-10 pointer-events-none" : ""
+      }">
       +
     </button>
   </div>
 </div>`;
 }
-function renderName(name) {
-  return `<div class="flex flex-col">
+function renderName(name, dos) {
+  return `<div class='flex justify-between'>
+  <div class="flex flex-col ml-1 mt-3">
             <span class="text-sm text-gray-500">For</span>
-            <h1 class="text-2xl font-bold">${name}</h1>
-         </div>`;
+            <h1 class="text-xl font-bold">${name}</h1>
+         </div>
+         <div class="flex flex-col ml-1 mt-3">
+            <span class="text-sm text-gray-500">Date of Surgery</span>
+            <h1 class="text-xl font-bold">${new Date(
+              dos
+            ).toLocaleDateString()}</h1>
+         </div>
+  </div>`;
 }
 function handleSelectedDateChange(e) {
   selectedDate = new Date(e.target.value).toDateString();
